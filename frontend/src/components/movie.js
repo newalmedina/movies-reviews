@@ -1,14 +1,12 @@
 import React, { useState, useEffect } from 'react'
-import MovieDataService from "../services/movies"
-import { Link } from "react-router-dom"
-import Container from 'react-bootstrap/Container'
-import Row from 'react-bootstrap/Row'
-import Col from 'react-bootstrap/Col'
-import Card from 'react-bootstrap/Card'
-import Button from 'react-bootstrap/Button'
-
+import MovieDataService from '../services/movies'
+import { Link } from 'react-router-dom'
+import Card from 'react-bootstrap/Card';
+import Container from 'react-bootstrap/Container';
 import Image from 'react-bootstrap/Image';
-import { Media } from 'react-bootstrap'
+import Col from 'react-bootstrap/Col';
+import Row from 'react-bootstrap/Row';
+import Button from 'react-bootstrap/Button';
 
 const Movie = props => {
 
@@ -29,9 +27,25 @@ const Movie = props => {
                 console.log(e)
             })
     }
+
     useEffect(() => {
         getMovie(props.match.params.id)
     }, [props.match.params.id])
+
+    const deleteReview = (reviewId, index) => {// need index of the review from the reviews array
+        MovieDataService.deleteReview(reviewId, props.user.id)
+            .then(response => {
+                setMovie((prevState) => {
+                    prevState.reviews.splice(index, 1)
+                    return ({
+                        ...prevState
+                    })
+                })
+            })
+            .catch(e => {
+                console.log(e)
+            })
+    }
 
     return (
         <div>
@@ -39,49 +53,52 @@ const Movie = props => {
                 <Row>
                     <Col>
                         <Image src={movie.poster + "/100px250"} fluid />
-                        <br></br>
-                        <Link to={"/movies/"} >Return back</Link>
                     </Col>
                     <Col>
                         <Card>
                             <Card.Header as="h5">{movie.title}</Card.Header>
-                            <Card.Body >
-                                <Card.Text>{movie.plot}</Card.Text>
+                            <Card.Body>
+                                <Card.Text>
+                                    {movie.plot}
+                                </Card.Text>
                                 {props.user &&
-                                    <Link to={"/movies/" + props.match.params.id + "/review"}>
-                                        Add Review
-                                    </Link>}
+                                    <Link to={"/movies/" + props.match.params.id + "/review"}>Add Review</Link>}
                             </Card.Body>
                         </Card>
                         <br></br>
                         <h2>Reviews</h2>
-                        {movie.reviews.map((review,index)=>{
+                        <br></br>
+                        {movie.reviews.map((review, index) => {
                             return (
-                                <Media   key={index}>
-                                    <Media.Body>
-                                        <h5>{review.name + " reviewed on "+review.date}</h5>
-                                        <p>{review.review}</p>
-                                        {props.user && props.user_id === review.user_id  && 
+                                <Card key={index}>
+                                    <Card.Header>
+                                        User:{review.user_id}
+                                    </Card.Header>
+                                    <Card.Body>
+                                        <h5>{review.name + " reviewed on " + review.date}</h5>
+                                        <p>
+                                            {review.review}
+                                        </p>
+                                        {props.user && props.user.id === review.user_id &&
                                             <Row>
-                                                <Col>
-                                                    <Link to={{
-                                                        pathname:"/movies/"+
-                                                        props.match.params.id +
-                                                        "/review",
-                                                        state :{currentReview:review}
-                                                    }}>Edit</Link>
-                                                </Col>
-                                                <Col><Button variant ="link">Delete</Button></Col>
+                                                <Col><Link to={{
+                                                    pathname: "/movies/" + props.match.params.id + "/review",
+                                                    state: {
+                                                        currentReview: review
+                                                    }
+                                                }}>Edit</Link></Col>
+                                                <Col><Button variant="link" onClick={() => deleteReview(review._id, index)}>Delete</Button></Col>
                                             </Row>
                                         }
-                                    </Media.Body>
-                                </Media>
+                                    </Card.Body>
+                                </Card>
                             )
                         })}
                     </Col>
                 </Row>
             </Container>
         </div>
-    )
+    );
 }
+
 export default Movie;
