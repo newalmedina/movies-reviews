@@ -70,9 +70,9 @@ const Movie = props => {
                         <br></br>
                         {movie.reviews.map((review, index) => {
                             return (
-                                <Card key={index}>
+                                <Card key={index} className="mb-2">
                                     <Card.Header>
-                                        User:{review.user_id}
+                                        User: {review.user_id}
                                     </Card.Header>
                                     <Card.Body>
                                         <h5>{review.name + " reviewed on " + review.date}</h5>
